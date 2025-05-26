@@ -2,29 +2,39 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class MahasiswaController extends Controller
 {
-    public function index() {
-        $mahasiswa = DB::select("SELECT * FROM mahasiswas");
-        return view('mahasiswa.index', compact('mahasiswa'));
+    public function index()
+    {
+        return response()->json(Mahasiswa::all());
     }
 
-    public function create() {
-        return view('mahasiswa.create');
+    public function store(Request $request)
+    {
+        $mahasiswa = Mahasiswa::create($request->only(['nama', 'nim', 'jurusan']));
+        return response()->json($mahasiswa, 201);
     }
 
-    public function store(Request $request) {
-        DB::insert("INSERT INTO mahasiswas (nama, nim, jurusan, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())", [
-            $request->nama, $request->nim, $request->jurusan
-        ]);
-        return redirect()->route('mahasiswa.index');
+    public function show($id)
+    {
+        $mhs = Mahasiswa::findOrFail($id);
+        return response()->json($mhs);
     }
 
-    public function destroy($id) {
-        DB::delete("DELETE FROM mahasiswas WHERE id = ?", [$id]);
-        return redirect()->route('mahasiswa.index');
+    public function update(Request $request, $id)
+    {
+        $mhs = Mahasiswa::findOrFail($id);
+        $mhs->update($request->only(['nama', 'nim', 'jurusan']));
+        return response()->json($mhs);
+    }
+
+    public function destroy($id)
+    {
+        $mhs = Mahasiswa::findOrFail($id);
+        $mhs->delete();
+        return response()->json(['message' => 'Berhasil dihapus']);
     }
 }
